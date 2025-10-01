@@ -54,6 +54,11 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+
+    // 내부 로깅 프레임워크 (Logback) 제외
+    all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
 }
 
 repositories {
@@ -61,6 +66,11 @@ repositories {
 }
 
 dependencies {
+
+    // log4j2
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+    implementation 'org.fusesource.jansi:jansi:2.4.2'
+
     //jpa
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 

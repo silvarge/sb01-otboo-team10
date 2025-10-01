@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="60">
+
+  <Properties>
+    <Property name="LOG_PATH">./logs</Property>
+    <Property name="CONSOLE_PATTERN">[%d{yyyy-MM-dd HH:mm:ss.SSS}] %highlight{%-5level} %style{${sys:PID}}{magenta} --- [%15.15t] [%X{requestId}] %X{method} %X{uri} %-40.40c{1.} : %m%n</Property>
+    <Property name="FILE_PATTERN">[%d{yyyy-MM-dd HH:mm:ss}] %-5level ${sys:PID} --- [%15.15t] [%X{requestId}] %X{method} %X{uri} %-40.40c{1.} : %m%n</Property>
+  </Properties>
+
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="${CONSOLE_PATTERN}" disableAnsi="false"/>
+    </Console>
+
+    <RollingFile name="RollingFile"
+      fileName="${LOG_PATH}/rolling-file-log.log"
+      filePattern="${LOG_PATH}/archive/rollingFile.%d{yyyy-MM-dd-HH-mm}_%i.gz">
+      <PatternLayout pattern="${FILE_PATTERN}"/>
+      <Policies>
+        <SizeBasedTriggeringPolicy size="200KB"/>
+        <TimeBasedTriggeringPolicy interval="1"/>
+      </Policies>
+      <DefaultRolloverStrategy max="30"/>
+    </RollingFile>
+
+    <File name="InfoFile" fileName="${LOG_PATH}/Api/api-info.log">
+      <Filters>
+        <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="NEUTRAL"/>
+        <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+      </Filters>
+      <PatternLayout pattern="${FILE_PATTERN}"/>
+    </File>
+
+    <File name="ErrorFile" fileName="${LOG_PATH}/Api/api-error.log">
+      <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+      <PatternLayout pattern="${FILE_PATTERN}"/>
+    </File>
+  </Appenders>
+
+  <Loggers>
+    <Root level="INFO">
+      <AppenderRef ref="Console"/>
+      <AppenderRef ref="RollingFile"/>
+      <AppenderRef ref="InfoFile"/>
+      <AppenderRef ref="ErrorFile"/>
+    </Root>
+
+    <Logger name="org.springframework" level="INFO"/>
+    <Logger name="com.codeit.weatherwear" level="DEBUG"/>
+    <Logger name="org.apache.kafka" level="WARN"/>
+    <Logger name="jdbc" level="OFF"/>
+    <Logger name="jdbc.sqltiming" level="INFO"/>
+  </Loggers>
+
+</Configuration>
