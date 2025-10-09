@@ -17,6 +17,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
       "/actuator/**", "/favicon.ico", "/error", "/css/**", "/js/**", "/images/**", "/webjars/**"
   };
 
+  /**
+   * Registers the MDC interceptor with highest precedence for all paths and excludes common static and actuator endpoints.
+   *
+   * @param registry the InterceptorRegistry to configure with the MDC interceptor
+   */
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(mdcInterceptor)

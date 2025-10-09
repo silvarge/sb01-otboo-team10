@@ -17,7 +17,14 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class MDCInterceptor implements HandlerInterceptor {
 
-  // MDC 값 설정
+  /**
+   * Populates the MDC with request-scoped identifiers for the current HTTP request.
+   *
+   * Sets the following MDC keys: "requestId" (a new UUID string), "method" (HTTP method),
+   * and "uri" (request URI).
+   *
+   * @return true to continue processing the request
+   */
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
@@ -28,7 +35,11 @@ public class MDCInterceptor implements HandlerInterceptor {
     return true;
   }
 
-  // MDC 초기화
+  /**
+   * Clears the SLF4J Mapped Diagnostic Context (MDC) after a request has completed.
+   *
+   * @param ex the exception thrown during request processing, or null if none
+   */
   @Override
   public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
       Object handler, Exception ex) throws Exception {
