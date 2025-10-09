@@ -38,13 +38,7 @@ spring:
 
 # logging
 logging:
-  level:
-    root: info
-    com.codeit.weatherwear: debug
-    org:
-      hibernate:
-        sql: debug
-
+  config: classpath:log4j2/log4j2-local.xml
 # port
 server:
   port: ${SERVER_PORT:8080}
