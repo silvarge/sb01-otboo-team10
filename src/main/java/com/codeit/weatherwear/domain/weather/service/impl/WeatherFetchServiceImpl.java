@@ -3,13 +3,12 @@ package com.codeit.weatherwear.domain.weather.service.impl;
 import com.codeit.weatherwear.domain.location.entity.Location;
 import com.codeit.weatherwear.domain.location.service.LocationService;
 import com.codeit.weatherwear.domain.weather.api.WeatherApiClient;
+import com.codeit.weatherwear.domain.weather.api.parser.WeatherApiParser;
 import com.codeit.weatherwear.domain.weather.entity.Weather;
 import com.codeit.weatherwear.domain.weather.entity.WeatherApiData;
-import com.codeit.weatherwear.domain.weather.parser.WeatherApiParser;
 import com.codeit.weatherwear.domain.weather.repository.WeatherRepository;
 import com.codeit.weatherwear.domain.weather.service.WeatherConvertService;
 import com.codeit.weatherwear.domain.weather.service.WeatherFetchService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -87,16 +86,15 @@ public class WeatherFetchServiceImpl implements WeatherFetchService {
 
     log.info("baseDate: {}, baseTime: {}", baseDate, baseTime);
 
-    ObjectMapper mapper = new ObjectMapper();
     // 위치 엔티티 조회, 존재하지 않을 시 생성
     Location location = locationService.findOrCreateByGeoPoint(latitude, longitude);
 
     // 단기 예보 API 요청 후 응답 Body 값 반환
-    String responseBody = weatherApiClient.fetchWeatherData(mapper, baseDate, baseTime,
-        location.getX(), location.getY());
+    String responseBody = weatherApiClient.fetchWeatherData(baseDate, baseTime, location.getX(),
+        location.getY());
 
     // 응답 Body 값 파싱하여 Map[예보 날짜,Map[예보 타입(POP 등), 예보 RAW 데이터]] 으로 반환
-    Map<String, Map<String, List<WeatherApiData>>> parsedWeatherApi = weatherApiParser.parse(mapper,
+    Map<String, Map<String, List<WeatherApiData>>> parsedWeatherApi = weatherApiParser.parse(
         responseBody);
 
     // 파싱한 데이터를 Weather 엔티티에 맞게 변환

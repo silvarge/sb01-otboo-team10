@@ -14,7 +14,7 @@ import com.codeit.weatherwear.domain.location.service.LocationService;
 import com.codeit.weatherwear.domain.weather.api.WeatherApiClient;
 import com.codeit.weatherwear.domain.weather.entity.Weather;
 import com.codeit.weatherwear.domain.weather.entity.WeatherApiData;
-import com.codeit.weatherwear.domain.weather.parser.WeatherApiParser;
+import com.codeit.weatherwear.domain.weather.api.parser.WeatherApiParser;
 import com.codeit.weatherwear.domain.weather.repository.WeatherRepository;
 import com.codeit.weatherwear.domain.weather.service.WeatherConvertService;
 import com.fasterxml.jackson.databind.ObjectMapper;
