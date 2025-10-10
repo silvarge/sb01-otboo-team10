@@ -3,6 +3,7 @@ package com.codeit.weatherwear.domain.weather.api;
 import com.codeit.weatherwear.domain.weather.api.strategy.WeatherApiStrategy;
 import com.codeit.weatherwear.domain.weather.config.WeatherApiProperties;
 import com.codeit.weatherwear.domain.weather.config.WeatherApiProperties.ApiEndpoint;
+import com.codeit.weatherwear.domain.weather.exception.UseStrategyNotFoundException;
 import com.codeit.weatherwear.domain.weather.exception.WeatherApiRequestException;
 import com.codeit.weatherwear.domain.weather.exception.WeatherApiResponseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,8 +45,7 @@ public class WeatherApiClient {
         .toList();
 
     if (activeEndpoints.isEmpty()) {
-      // todo: 요청 할 수 있는 엔드포인트가 없다는 예외 추가
-      throw new WeatherApiRequestException();
+      throw new UseStrategyNotFoundException();
     }
 
     // 마지막에 발생한 예외 기록용 - 어디까지 잘못됐나 추적
@@ -69,7 +69,6 @@ public class WeatherApiClient {
     }
 
     log.error("All weather forecast API endpoints failed");
-    // todo: 예외 처리 추후 조심해야 함
     throw new WeatherApiRequestException("All Configured weather APIs failed", lastException);
   }
 
@@ -77,8 +76,7 @@ public class WeatherApiClient {
     return strategies.stream()
         .filter(s -> s.supports(apiName))
         .findFirst()
-        .orElseThrow(() -> new IllegalStateException(
-            "No Strategy found for Weather Forecast API: " + apiName));
+        .orElseThrow(() -> new UseStrategyNotFoundException(apiName));
   }
 
 }
