@@ -8,4 +8,8 @@ public class WeatherApiRequestException extends CustomException {
   public WeatherApiRequestException() {
     super(ErrorCode.WEATHER_API_REQUEST_ERROR);
   }
+
+  public WeatherApiRequestException(String msg, Exception lastException) {
+    super(ErrorCode.WEATHER_API_REQUEST_ERROR);
+  }
 }
