@@ -2,7 +2,6 @@ package com.codeit.weatherwear.global.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties.Http;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -52,6 +51,7 @@ public enum ErrorCode {
   WEATHER_API_PARSING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "단기 예보 JSON 파싱 실패",
       "단기 예보 JSON 파싱 중 오류가 발생하여 실패하였습니다."),
   WEATHER_NOT_FOUND(HttpStatus.NOT_FOUND, "날씨 확인 실패", "존재하지 않는 날씨입니다."),
+  WEATHER_REQUEST_API_NOT_FOUND(HttpStatus.NOT_FOUND, "요청 가능한 API 없음", "요청할 수 있는 API가 존재하지 않습니다."),
 
   // SECURITY
   JWTSESSION_NOT_FOUND(HttpStatus.UNAUTHORIZED, "인증 정보 확인 실패", "토큰이 만료되거나 로그아웃되었습니다."),

@@ -61,7 +61,7 @@ public class WeatherConvertServiceImpl implements WeatherConvertService {
   /**
    * @param fcstDate       예보 날짜 (yyyyMMdd)
    * @param timeMap        시간별 WeatherApiData 리스트 맵
-   * @param groupedApiData 카테고리별로 그룹화된 WeatherApiData 맵 (fcstDate -> fcstTime -> data)
+   * @param compareWeather Weather 엔티티
    * @param location       위치 정보
    * @return 변환된 Weather 객체(Optional), 변환 불가 시 Optional.empty()
    */

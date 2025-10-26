@@ -8,7 +8,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.codeit.weatherwear.domain.weather.exception.WeatherApiRequestException;
 import com.codeit.weatherwear.domain.weather.exception.WeatherApiResponseException;
-import com.codeit.weatherwear.global.properties.WeatherApiProperties;
+import com.codeit.weatherwear.domain.weather.config.WeatherApiProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.http.HttpClient;

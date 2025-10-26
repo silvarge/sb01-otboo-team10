@@ -1,16 +1,15 @@
 package com.codeit.weatherwear.domain.weather.api;
 
+import com.codeit.weatherwear.domain.weather.api.strategy.WeatherApiStrategy;
+import com.codeit.weatherwear.domain.weather.config.WeatherApiProperties;
+import com.codeit.weatherwear.domain.weather.config.WeatherApiProperties.ApiEndpoint;
+import com.codeit.weatherwear.domain.weather.exception.UseStrategyNotFoundException;
 import com.codeit.weatherwear.domain.weather.exception.WeatherApiRequestException;
 import com.codeit.weatherwear.domain.weather.exception.WeatherApiResponseException;
-import com.codeit.weatherwear.global.properties.WeatherApiProperties;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
+import java.util.Comparator;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,8 +23,9 @@ import org.springframework.stereotype.Component;
 public class WeatherApiClient {
 
   private final WeatherApiProperties apiProperties;
-
   private final HttpClient httpClient;
+  private final ObjectMapper mapper;
+  private final List<WeatherApiStrategy> strategies;  // API 별 전략
 
   /**
    * 단기 예보 API에 데이터를 요청하여 응답을 받아와 리턴한다.
@@ -37,48 +37,46 @@ public class WeatherApiClient {
    * @param ny       예보 지점 Y좌표
    * @return API 응답 데이터(ResponseBody)
    */
-  public String fetchWeatherData(
-      ObjectMapper mapper, String baseDate, String baseTime, int nx, int ny) {
-    // 기본 파라미터 세팅
-    String REQUEST_PARAM_DATA_TYPE = "JSON";
-    int REQUEST_PARAM_NUM_OF_ROWS = 1500;
+  public String fetchWeatherData(String baseDate, String baseTime, int nx, int ny) {
+    // 우선 순위 순으로 엔드포인트 정렬
+    List<ApiEndpoint> activeEndpoints = apiProperties.endPoints().stream()
+        .filter(WeatherApiProperties.ApiEndpoint::enabled)
+        .sorted(Comparator.comparingInt(WeatherApiProperties.ApiEndpoint::priority))
+        .toList();
 
-    // 요청 URL 세팅
-    String requestUrl = String.format(
-        "%s?serviceKey=%s&numOfRows=%d&dataType=%s&base_date=%s&base_time=%s&nx=%d&ny=%d",
-        apiProperties.apiUrl(), apiProperties.apiServiceKey(),
-        REQUEST_PARAM_NUM_OF_ROWS, REQUEST_PARAM_DATA_TYPE, baseDate, baseTime, nx, ny
-    );
-
-    // HttpClient 세팅 및 요청 세팅
-    HttpRequest request = HttpRequest.newBuilder()
-        .uri(URI.create(requestUrl))
-        .GET()
-        .build();
-
-    try {
-      HttpResponse<String> response = httpClient.send(request, BodyHandlers.ofString());
-      String resultCode = extractResultCode(mapper, response.body());
-      // 응답 코드가 00이 아니면 비정상적인 응답 (오류)
-      if (!"00".equals(resultCode)) {
-        log.warn("Weather Api Response Invalid");
-        throw new WeatherApiResponseException(resultCode);
-      }
-      // 응답 Body 전달
-      return response.body();
-    } catch (IOException | InterruptedException e) {
-      log.info("url: {}", requestUrl);
-      log.error("Weather Api Request Invalid - cause: {}\nmessage: {}", e.getCause(),
-          e.getMessage());
-      throw new WeatherApiRequestException();
+    if (activeEndpoints.isEmpty()) {
+      throw new UseStrategyNotFoundException();
     }
+
+    // 마지막에 발생한 예외 기록용 - 어디까지 잘못됐나 추적
+    Exception lastException = null;
+
+    for (ApiEndpoint endpoint : activeEndpoints) {
+      try {
+        log.info("Attempting Weather API: {} (priority: {})", endpoint.name(), endpoint.priority());
+
+        WeatherApiStrategy strategy = findStrategy(endpoint.name());
+        String responseBody = strategy.fetchData(httpClient, mapper, endpoint, baseDate, baseTime,
+            nx, ny);
+
+        log.info("Successfully fetched weather data from: {}", endpoint.name());
+        return responseBody;
+
+      } catch (WeatherApiResponseException | WeatherApiRequestException we) {
+        log.warn("Failed to fetch from {}: {}", endpoint.name(), we.getMessage());
+        lastException = we;
+      }
+    }
+
+    log.error("All weather forecast API endpoints failed");
+    throw new WeatherApiRequestException("All Configured weather APIs failed", lastException);
   }
 
-  private String extractResultCode(ObjectMapper mapper, String responseBody)
-      throws IOException {
-    // Header의 resultCode 필드 속 값 String 형태로 추출
-    JsonNode root = mapper.readTree(responseBody);
-    return root.path("response").path("header").path("resultCode").asText();
+  private WeatherApiStrategy findStrategy(String apiName) {
+    return strategies.stream()
+        .filter(s -> s.supports(apiName))
+        .findFirst()
+        .orElseThrow(() -> new UseStrategyNotFoundException(apiName));
   }
 
 }

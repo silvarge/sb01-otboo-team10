@@ -88,10 +88,19 @@ server:
   forward-headers-strategy: native
 
 weather:
-  api-url: ${WEATHER_INFO_API_URL}
-  api-service-key: ${WEATHER_INFO_SERVICE_KEY}
   batch:
     chunk-size: 100
+  end-points:
+    - name: open-api  # open data 포탈
+      api-url: ${WEATHER_INFO_API_URL}
+      api-service-key: ${WEATHER_INFO_SERVICE_KEY}
+      priority: 1
+      enabled: true
+    - name: kma-api  # 기상청 오픈 API
+      api-url: ${WEATHER_INFO_KMA_API_URL}
+      api-service-key: ${WEATHER_INFO_KMA_SERVICE_KEY}
+      priority: 2
+      enabled: true
 
 location:
   api-url: ${LOCATION_API_URL}

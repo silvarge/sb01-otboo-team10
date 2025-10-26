@@ -9,7 +9,7 @@ import static org.mockito.BDDMockito.given;
 import com.codeit.weatherwear.domain.location.exception.KakaoGeoApiRequestException;
 import com.codeit.weatherwear.domain.location.exception.KakaoGeoApiResponseException;
 import com.codeit.weatherwear.domain.location.parser.LocationApiParser;
-import com.codeit.weatherwear.global.properties.LocationApiProperties;
+import com.codeit.weatherwear.domain.location.properties.LocationApiProperties;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
