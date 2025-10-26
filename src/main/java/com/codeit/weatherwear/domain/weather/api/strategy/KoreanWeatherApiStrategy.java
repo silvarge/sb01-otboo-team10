@@ -64,7 +64,6 @@ public abstract class KoreanWeatherApiStrategy implements WeatherApiStrategy {
       log.info("url: {}", requestUrl);
       log.error("Weather Api Request Invalid - cause: {}\nmessage: {}", e.getCause(),
           e.getMessage());
-      throw new WeatherApiRequestException();
       throw new WeatherApiRequestException("Weather API request failed", e);
     }
   }
