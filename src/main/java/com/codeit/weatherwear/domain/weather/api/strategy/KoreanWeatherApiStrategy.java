@@ -7,10 +7,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -52,11 +54,18 @@ public abstract class KoreanWeatherApiStrategy implements WeatherApiStrategy {
       }
       // 응답 Body 전달
       return response.body();
-    } catch (IOException | InterruptedException e) {
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      log.info("url: {}", requestUrl);
+      log.error("Weather Api Request Invalid - cause: {}\nmessage: {}", e.getCause(),
+          e.getMessage());
+      throw new WeatherApiRequestException("Weather API request interrupted", e);
+    } catch (IOException e) {
       log.info("url: {}", requestUrl);
       log.error("Weather Api Request Invalid - cause: {}\nmessage: {}", e.getCause(),
           e.getMessage());
       throw new WeatherApiRequestException();
+      throw new WeatherApiRequestException("Weather API request failed", e);
     }
   }
 
@@ -64,7 +73,8 @@ public abstract class KoreanWeatherApiStrategy implements WeatherApiStrategy {
       int ny) {
     return String.format(
         "%s?%s=%s&numOfRows=%d&dataType=%s&base_date=%s&base_time=%s&nx=%d&ny=%d",
-        endpoint.apiUrl(), getServiceKeyParamName(), endpoint.apiServiceKey(),
+        endpoint.apiUrl(), getServiceKeyParamName(),
+        URLEncoder.encode(endpoint.apiServiceKey(), StandardCharsets.UTF_8),
         NUM_OF_ROWS, DATA_TYPE, baseDate, baseTime, nx, ny
     );
   }
